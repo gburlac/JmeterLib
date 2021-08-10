@@ -11,25 +11,22 @@
 
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <jdk.version>8</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <lombok.version>1.18.20</lombok.version>
         <fasterxml.jackson.version>2.11.3</fasterxml.jackson.version>
         <auth0.version>3.15.0</auth0.version>
         <bcprov.version>1.64</bcprov.version>
-
     </properties>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_java -->
         <dependency>
             <groupId>org.apache.jmeter</groupId>
             <artifactId>ApacheJMeter_java</artifactId>
             <version>5.1.1</version>
             <exclusions>
-
                 <exclusion>
                     <artifactId>jorphan</artifactId>
                     <groupId>org.apache.jmeter</groupId>
@@ -320,11 +317,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${fasterxml.jackson.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
             <version>${auth0.version}</version>
@@ -341,90 +333,89 @@
             <version>${bcprov.version}</version>
         </dependency>
     </dependencies>
+
 <!--    <build>-->
 <!--        <plugins>-->
+
 <!--            <plugin>-->
-<!--                <artifactId>maven-assembly-plugin</artifactId>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.8.0</version>-->
 <!--                <configuration>-->
-<!--                    <archive>-->
-<!--                        <manifest>-->
-<!--                            <mainClass>jwt.JWTGenerator</mainClass>-->
-<!--                        </manifest>-->
-<!--                    </archive>-->
-<!--                    <descriptorRefs>-->
-<!--                        <descriptorRef>jar-with-dependencies</descriptorRef>-->
-<!--                    </descriptorRefs>-->
+<!--                    <source>${jdk.version}</source>-->
+<!--                    <target>${jdk.version}</target>-->
+<!--                    <release>${jdk.version}</release>-->
 <!--                </configuration>-->
+<!--            </plugin>-->
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-shade-plugin</artifactId>-->
+<!--                <version>3.2.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>shade</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <transformers>-->
+<!--                                <transformer-->
+<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--                                    <mainClass>LibExe</mainClass>-->
+<!--                                </transformer>-->
+<!--                            </transformers>-->
+<!--                            <filters>-->
+<!--                                <filter>-->
+<!--                                    <artifact>*:*</artifact>-->
+<!--                                    <excludes>-->
+<!--                                        <exclude>META-INF/*.SF</exclude>-->
+<!--                                        <exclude>META-INF/*.DSA</exclude>-->
+<!--                                        <exclude>META-INF/*.RSA</exclude>-->
+<!--                                    </excludes>-->
+<!--                                </filter>-->
+<!--                            </filters>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
 <!--            </plugin>-->
 <!--        </plugins>-->
 <!--    </build>-->
+
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
-                    <release>${jdk.version}</release>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <phase>install</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>Launcher</mainClass>
-                                </transformer>
-                            </transformers>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
+                            <outputDirectory>target/lib</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>signer</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
-                    <archive>${basedir}/target/${project.build.finalName}.${packaging-suffix}</archive>
-                    <keystore>${basedir}/keystore.jks</keystore>
-                    <alias>demo</alias>
-                    <storepass>123456</storepass>
-                    <keypass>123456</keypass>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>libs/</classpathPrefix>
+                            <mainClass>lib.LibExe
+                            </mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>
